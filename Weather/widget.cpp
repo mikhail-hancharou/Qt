@@ -171,10 +171,6 @@ void Widget::setBackground(QPainter *qp)
      QBrush brush(col);
      qp->fillPath(path, brush);
      qp->drawPath(path);
-
-     QColor cl;
-     cl.setRgb(1, 1, 1, 100);
-     qp->fillRect(10, 10, 40, 40, cl);
 }
 
 void Widget::wheelEvent(QWheelEvent *ev)
@@ -184,12 +180,12 @@ void Widget::wheelEvent(QWheelEvent *ev)
         if(ev->angleDelta().y() / 120 > 0)
         {
             i--;
-            n -= 6;// up Wheel
+            n -= 9;// up Wheel
         }
         else if(ev->angleDelta().y() / 120 < 0)
         {
             i++;
-            n += 6;//down Wheel
+            n += 9;//down Wheel
         }
 
         if (n < 0) n = 0;
@@ -212,6 +208,8 @@ int count = 0;
 void Widget::caseInfo(QPainter *qp)
 {
     qDebug() << "loop" << count++;
+    if (existInfo == true)
+    {
     int bound = 0;
     int line;
     if (forecastCase == 1) bound = 60;
@@ -223,9 +221,9 @@ void Widget::caseInfo(QPainter *qp)
     QPainterPath path;
     QColor cl;
     //debug line
-    cl.setRgb(100, 20, 200, 255);
-    qp->setPen(cl);
-    qp->drawLine(50, 400, 800, 400);
+    //cl.setRgb(100, 20, 200, 255);
+    //qp->setPen(cl);
+    //qp->drawLine(50, 400, 800, 400);
 
     path.addRect(QRectF(50, 270, 750, 80));//top gradient
     QLinearGradient lGrad(QPointF(400, 285), QPointF(400, 355));
@@ -251,6 +249,7 @@ void Widget::caseInfo(QPainter *qp)
 
     qp->fillRect(50, 530, 750, 90, col);//bottom rect to hide
     update();
+    }
 }
 
 void Widget::currentCaseOfInfo(int cLine, int bound, bool side, int num, QPainter *qp)
@@ -289,16 +288,16 @@ void Widget::currentCaseOfInfo(int cLine, int bound, bool side, int num, QPainte
     if (forecastCase == 0)
     {
         qp->drawText(60, cLine + 30, "Sunrise: " + sunrise[num] + ";");
-        qp->drawText(260, cLine + 30, "Hum: " + QString::number(humidity[num]).rightJustified(5) + ";");
-        qp->drawText(600, cLine + 30, "Wind m/s: " + QString::number(wind_speed[num]));
-        drawWindAngle(780, cLine + 20, num);
+        qp->drawText(260, cLine + 30, "Wind m/s: " + QString::number(wind_speed[num]));
+        drawWindAngle(450, cLine + 20, num);
+        qp->drawText(480, cLine + 30, "Uvi: ");
+        drawUvi(540, cLine + 20, num);
 
         drawMoon(400, cLine + 30, num);
 
         qp->drawText(60, cLine + 65, "Sunset: " + sunset[num].rightJustified(9) + ";");
-        qp->drawText(260, cLine + 65, "Press: " + QString::number(pressure[num]) + ";");
-        qp->drawText(700, cLine + 65, "Uvi: ");
-        drawUvi(780, cLine + 58, num);
+        qp->drawText(260, cLine + 65, "Press: " + QString::number(pressure[num]).rightJustified(5) + ";");
+        qp->drawText(400, cLine + 65, "Hum: " + QString::number(humidity[num]) + ";");
     }
     else if (forecastCase == 1)
     {
@@ -308,14 +307,35 @@ void Widget::currentCaseOfInfo(int cLine, int bound, bool side, int num, QPainte
     }
     else if (forecastCase == 2)
     {
+        qp->drawText(60, cLine + 30, "Wind m/s: " + QString::number(wind_speed[num]).rightJustified(5));
+        drawWindAngle(250, cLine + 20, num);
+        qp->drawText(280, cLine + 30, "Uvi: ");
+        drawUvi(340, cLine + 20, num);
+        qp->drawText(365, cLine + 30, "Vision: " + QString::number(visibility[num]).rightJustified(5));
 
+        qp->drawText(60, cLine + 65, "Gust m/s: " + QString::number(wind_gust[num]));
+        qp->drawText(240, cLine + 65, "Press: " + QString::number(pressure[num]).rightJustified(5) + ";");
+        qp->drawText(380, cLine + 65, "Hum: " + QString::number(humidity[num]) + ";");
+        qp->drawText(500, cLine + 65, "Dew p.(C): " + QString::number(dew_point[num]));
+
+        drawCloud(760, cLine + 39, num);
     }
     else
     {
-        drawWindAngle(300, cLine + 50, num);
-        drawUvi(500, cLine + 30, num);
-        drawMoon(400, cLine + 30, num);
-        drawCloud(450, cLine + 30, num);
+        qp->drawText(60, cLine + 30, "Sunrise: " + sunrise[num] + ";");
+        qp->drawText(260, cLine + 30, "Wind m/s: " + QString::number(wind_speed[num]));
+        drawWindAngle(450, cLine + 20, num);
+        qp->drawText(480, cLine + 30, "Uvi: ");
+        drawUvi(540, cLine + 20, num);
+        qp->drawText(565, cLine + 30, "Moon: ");
+        drawMoon(650, cLine + 20, num);
+
+        qp->drawText(60, cLine + 65, "Sunset: " + sunset[num].rightJustified(9) + ";");
+        qp->drawText(260, cLine + 65, "Press: " + QString::number(pressure[num]).rightJustified(5) + ";");
+        qp->drawText(400, cLine + 65, "Hum: " + QString::number(humidity[num]) + ";");
+        qp->drawText(500, cLine + 65, "Max/Min(C): " + QString::number(tempMax[num]) + "/" + QString::number(tempMin[num]));
+
+        drawCloud(760, cLine + 39, num);
     }
 }
 
@@ -436,7 +456,6 @@ void Widget::drawCloud(int space, int cLine, int num)
     if (clouds[num] >= 50)
     {
         qp->setBrush(Qt::black);
-        //qp->drawEllipse(QPoint(3, -3), 5, 5);
         qp->drawEllipse(QPoint(10, -8), 5, 5);
         qp->drawEllipse(QPoint(18, -6), 4, 4);
         qp->drawEllipse(QPoint(23, -2), 4, 4);
@@ -471,6 +490,43 @@ void Widget::paintEvent(QPaintEvent *event)
     Q_UNUSED(event);
     QPainter qp(this);
     Widget::qp = &qp;
+
+    qp.save();
+
+    QPainterPath path;
+    QColor cl(Qt::black);
+
+    qp.setPen(Qt::NoPen);
+    path.addRoundedRect(QRectF(870, 525, 200, 100), 15, 15);
+    QBrush brushh(cl);
+    qp.fillPath(path, brushh);
+    qp.drawPath(path);
+    path = QPainterPath();
+
+    QFont font("Cursive", 14, -1, true);
+    qp.setFont(font);
+
+    cl.setNamedColor("#C51D34");
+    path.addText(925, 575, font, "Michael");
+    font = QFont("Cursive", 11, -1, true);
+    path.addText(925, 589, font, "industries");
+    QLinearGradient lGrad(QPointF(925, 580), QPointF(970, 580));
+    lGrad.setColorAt(1, cl);
+    cl.setNamedColor("#FF8800");
+    lGrad.setColorAt(0, cl);
+    QBrush brush(lGrad);
+    QPolygonF polygon;
+    polygon << QPointF(915, 555) << QPointF(1012, 555) << QPointF(1001, 592) << QPointF(1020, 550);
+    path.addPolygon(polygon);
+    qp.fillPath(path, brush);
+    qp.drawPath(path);
+
+    //qp.setFont(QFont("Cursive", 14, QFont::Bold));//Cursive
+    //qp.setPen(p);
+    //qp.drawText(900, 600, "Michael");
+    qp.restore();
+
+
     setBackground(&qp);
     caseInfo(&qp);
 }

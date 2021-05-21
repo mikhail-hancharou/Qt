@@ -103,7 +103,7 @@ private:
     int timezone_offset;
     bool existInfo = false;
 
-    //current, hourly
+    //current, hourly, daily
     QString data[61];//partially minutely
     QString dt[61];//partially minutely
     QString sunrise[8];//ain't in hourly
