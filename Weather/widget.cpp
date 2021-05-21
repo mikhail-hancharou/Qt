@@ -21,7 +21,6 @@ Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget)
 {
-    //sky #00CED1
     this->setStyleSheet("background-color: #5F9EA0;");
     ui->setupUi(this);
     ui->setLat->setRange(-180, 180);
@@ -52,11 +51,8 @@ Widget::Widget(QWidget *parent) :
 
     networkManager = new QNetworkAccessManager();
     networkManagerCoord = new QNetworkAccessManager();
-    // Подключаем networkManager к обработчику ответа
     connect(networkManager, &QNetworkAccessManager::finished, this, &Widget::onResult);
     connect(networkManagerCoord, &QNetworkAccessManager::finished, this, &Widget::onResultCoord);
-    // Получаем данные, а именно JSON файл с сайта по определённому url
-    //networkManager->get(QNetworkRequest(QUrl(name)));//"http://www.evileg.ru/it_example.json"
 }
 
 Widget::~Widget()
@@ -520,12 +516,7 @@ void Widget::paintEvent(QPaintEvent *event)
     path.addPolygon(polygon);
     qp.fillPath(path, brush);
     qp.drawPath(path);
-
-    //qp.setFont(QFont("Cursive", 14, QFont::Bold));//Cursive
-    //qp.setPen(p);
-    //qp.drawText(900, 600, "Michael");
     qp.restore();
-
 
     setBackground(&qp);
     caseInfo(&qp);
