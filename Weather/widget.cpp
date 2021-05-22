@@ -29,7 +29,16 @@ Widget::Widget(QWidget *parent) :
     ui->setLon->setSingleStep(0.1);
     ui->setLat->setDecimals(4);
     ui->setLon->setDecimals(4);
+    ui->progressBar->setRange(0, 10);
 
+    ui->progressBar->setStyleSheet("QProgressBar{color:rgba(255,255,250,0);"
+                                   "border-radius: 5px;"
+                                   "border-width: 3px;"
+                                   "background-color: #5F9EA0}"
+                                   "QProgressBar::chunk {background-color: #FFCF40}");
+    ui->progressBar->setTextVisible(false);
+    ui->progressBar->setMaximumHeight(3);
+    //#FF8800
     ui->textBrowser->setStyleSheet("QTextBrowser { color: #B0E0E6; background-color: rgba(95,158,160,80);"
                                    "border-style: outset;"
                                    "border-width: 2px;"
@@ -289,8 +298,6 @@ void Widget::currentCaseOfInfo(int cLine, int bound, bool side, int num, QPainte
         qp->drawText(480, cLine + 30, "Uvi: ");
         drawUvi(540, cLine + 20, num);
 
-        drawMoon(400, cLine + 30, num);
-
         qp->drawText(60, cLine + 65, "Sunset: " + sunset[num].rightJustified(9) + ";");
         qp->drawText(260, cLine + 65, "Press: " + QString::number(pressure[num]).rightJustified(5) + ";");
         qp->drawText(400, cLine + 65, "Hum: " + QString::number(humidity[num]) + ";");
@@ -331,7 +338,7 @@ void Widget::currentCaseOfInfo(int cLine, int bound, bool side, int num, QPainte
         qp->drawText(400, cLine + 65, "Hum: " + QString::number(humidity[num]) + ";");
         qp->drawText(500, cLine + 65, "Max/Min(C): " + QString::number(tempMax[num]) + "/" + QString::number(tempMin[num]));
 
-        drawCloud(760, cLine + 39, num);
+        drawCloud(760, cLine + 28, num);
     }
 }
 
@@ -456,13 +463,62 @@ void Widget::drawCloud(int space, int cLine, int num)
         qp->drawEllipse(QPoint(18, -6), 4, 4);
         qp->drawEllipse(QPoint(23, -2), 4, 4);
         qp->fillRect(5, -4, 20, 6, Qt::black);
+        qp->setBrush(Qt::white);
+        qp->drawEllipse(QPoint(0, 0), 5, 5);
+        qp->drawEllipse(QPoint(5, -5), 5, 5);
+        qp->drawEllipse(QPoint(13, -3), 4, 4);
+        qp->drawEllipse(QPoint(18, 1), 4, 4);
+        qp->fillRect(0, -1, 20, 6, Qt::white);
     }
-    qp->setBrush(Qt::white);
-    qp->drawEllipse(QPoint(0, 0), 5, 5);
-    qp->drawEllipse(QPoint(5, -5), 5, 5);
-    qp->drawEllipse(QPoint(13, -3), 4, 4);
-    qp->drawEllipse(QPoint(18, 1), 4, 4);
-    qp->fillRect(0, -1, 20, 6, Qt::white);
+    else
+    {
+        if (forecastCase == 2)
+        {
+            QString str = dt[num].left(2);
+            int hours = str.toInt();
+            qp->setBrush(Qt::yellow);
+            if (hours >= 6 && hours < 18)
+            {
+                qp->drawEllipse(QPoint(13, -8), 7, 7);
+            }
+            else if (hours >= 18 && hours < 22)
+            {
+                QBrush br("#FF8800");
+                qp->setBrush(br);
+                qp->drawEllipse(QPoint(13, -8), 7, 7);
+            }
+            else
+            {
+                qp->drawEllipse(QPoint(13, -8), 7, 7);
+                QBrush br("#5F9EA0");
+                qp->setBrush(br);
+                qp->drawEllipse(QPoint(16, -8), 5, 5);
+            }
+        }
+        else
+        {
+            qp->setBrush(Qt::yellow);
+            qp->drawEllipse(QPoint(13, -8), 7, 7);
+        }
+        if (clouds[num] >= 25)
+        {
+            qp->setBrush(Qt::white);
+            qp->drawEllipse(QPoint(0, 0), 5, 5);
+            qp->drawEllipse(QPoint(5, -5), 5, 5);
+            qp->drawEllipse(QPoint(13, -3), 4, 4);
+            qp->drawEllipse(QPoint(18, 1), 4, 4);
+            qp->fillRect(0, -1, 20, 6, Qt::white);
+        }
+        else
+        {
+            qp->setBrush(Qt::white);
+            qp->drawEllipse(QPoint(0, 0), 4, 4);
+            qp->fillRect(0, -1, 15, 5, Qt::white);
+            qp->drawEllipse(QPoint(15, 0), 4, 4);
+            qp->drawEllipse(QPoint(7, -3), 6, 6);
+        }
+    }
+
     QPen p;
     if (forecastCase != 0 && pop[num] >= 0.5)
     {
@@ -602,6 +658,7 @@ void Widget::setData(QJsonValue jvv, int i)
 void Widget::onResultCoord(QNetworkReply *reply)
 {
     //i = 0;
+    ui->progressBar->setValue(6);
     if(!reply->error())
     {
         QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
@@ -620,6 +677,7 @@ void Widget::onResultCoord(QNetworkReply *reply)
 
 void Widget::onResult(QNetworkReply *reply)
 {
+    ui->progressBar->setValue(10);
     if(!reply->error())
     {
         existInfo = true;
@@ -762,6 +820,7 @@ void Widget::onResult(QNetworkReply *reply)
     reply->deleteLater();
     i = 0;
     n = 0;
+    ui->progressBar->setValue(0);
 }
 
 
@@ -785,11 +844,14 @@ void Widget::chooseData()
         on_current_clicked();
         break;
     }
+    ui->progressBar->setValue(8);
     networkManager->get(QNetworkRequest(QUrl(url)));
 }
 
 void Widget::on_setl_clicked()
 {
+    ui->progressBar->setValue(2);
+    QThread::msleep(20);
     forecastCase = forecastCaseTemp;
     if (lastClickLE == true)
     {
