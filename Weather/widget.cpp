@@ -817,6 +817,7 @@ void Widget::onResult(QNetworkReply *reply)
     }
     ui->setLon->setValue(lon);
     ui->setLat->setValue(lat);
+    lastClickLE = true;
     reply->deleteLater();
     i = 0;
     n = 0;
@@ -950,6 +951,7 @@ void Widget::on_locations_activated(const QString &arg1)
         tempLat = 34.05;
         tempLon = -118.2;
     }
+    lastClickLE = false;
 }
 
 void Widget::on_cityName_textEdited(const QString &arg1)
