@@ -53,7 +53,7 @@ Widget::Widget(QWidget *parent) :
                                    "border-color: rgba(95,158,160,0);"
                                    "font: bold 22px;}");
 
-    QStringList loc = {"London", "Minsk", "Chicago", "Paris", "San Francisco", "Los Angeles"};
+    QStringList loc = {"...", "London", "Minsk", "Chicago", "Paris", "San Francisco", "Los Angeles"};
     ui->locations->addItems(loc);
     setDesign(ui->setLat, ui->setLon, ui->current, ui->minutely, ui->hourly, ui->daily,
               ui->setl, ui->locations, ui->cityName, ui->label, ui->label_2, ui->groupBox);
@@ -855,12 +855,14 @@ void Widget::on_setl_clicked()
     forecastCase = forecastCaseTemp;
     if (lastClickLE == true)
     {
+        ui->locations->setCurrentText("...");
         qDebug() << text;
         url = "http://api.openweathermap.org/data/2.5/weather?q=" + text + "&appid=57e9a6f3b67fc7f28dc242e7ab0ec508";
         networkManagerCoord->get(QNetworkRequest(QUrl(url)));
     }
     else
     {
+        ui->cityName->setText("");
         lat = tempLat;
         lon = tempLon;
         chooseData();
@@ -913,6 +915,11 @@ void Widget::on_daily_clicked()
 
 void Widget::on_locations_activated(const QString &arg1)
 {
+    if (arg1 == "...")
+    {
+        tempLat = 0;
+        tempLon = 0;
+    }
     if (arg1 == "London")
     {
         tempLat = 51.5085;
@@ -943,7 +950,6 @@ void Widget::on_locations_activated(const QString &arg1)
         tempLat = 34.05;
         tempLon = -118.2;
     }
-    //on_setl_clicked();
 }
 
 void Widget::on_cityName_textEdited(const QString &arg1)
