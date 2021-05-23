@@ -670,8 +670,22 @@ void Widget::onResultCoord(QNetworkReply *reply)
         qDebug() << lat;
         lon = jo.value("lon").toDouble();
         qDebug() << lon;
+        chooseData();
     }
-    chooseData();
+    else
+    {
+        QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
+        QJsonObject root = document.object();
+        message = root.value("message").toString();
+        qDebug() << message << "mes";
+        if (message == "city not found")
+        {
+            existInfo = false;
+            ui->textBrowser->setText(message);
+            ui->textBrowser_2->setText("");
+        }
+    }
+    //chooseData();
     reply->deleteLater();
 }
 

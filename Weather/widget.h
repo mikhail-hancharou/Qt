@@ -144,6 +144,8 @@ private:
     double flNight[8];//feels_like
     double flEve[8];//feels_like
     double flMorn[8];//feels_like
+
+    QString message;
 };
 
 #endif // WIDGET_H
